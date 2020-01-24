@@ -1,0 +1,39 @@
+<config>
+    <searchQuery>
+        Java
+    </searchQuery>
+
+    <location>
+        usa
+    </location>
+
+    <sites>
+        <site>
+            https://indeed.com
+        </site>
+
+        <site>
+            https://monster.com
+        </site>
+
+        <site>
+            https://github.com
+        </site>
+    </sites>
+
+    <frequency>
+        <hours>
+            0
+
+        </hours>
+
+        <minutes>
+            1
+        </minutes>
+
+        <seconds>
+            10
+        </seconds>
+    </frequency>
+
+</config>
