@@ -1,10 +1,32 @@
 package jobsfinder;
 
+import jobsfinder.config.Config;
+import jobsfinder.scrapers.*;
+
+import javax.print.attribute.standard.JobSheets;
 import java.io.*;
 import java.nio.file.Paths;
 import java.util.*;
 
 public class Utils {
+    public static List<JobsScraper> getScrapers(Config config)  {
+        List<JobsScraper> scrapers = new ArrayList<>();
+        if (config.getSites().getSites().contains("indeed"))  {
+            scrapers.add(new IndeedScraper(config));
+        }
+        if (config.getSites().getSites().contains("monster"))  {
+            scrapers.add(new MonsterScraper(config));
+        }
+        if (config.getSites().getSites().contains("github"))  {
+            scrapers.add(new GithubScraper(config));
+        }
+        if (config.getSites().getSites().contains("stackoverflow"))  {
+            scrapers.add(new StackoverflowScraper(config));
+        }
+
+        return scrapers;
+    }
+
     public static void removeDuplicates(Set<Job> allJobs,
                                         List<List<Job>> jobsLists)  {
         for (List<Job> jobs: jobsLists)  {

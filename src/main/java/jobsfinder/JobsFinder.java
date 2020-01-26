@@ -22,19 +22,7 @@ public class JobsFinder {
                 config.getFrequency().getMinutes() * 60 +
                 config.getFrequency().getHours() * 60 * 60;
 
-        scrapers = new ArrayList<>();
-        if (config.getSites().getSites().contains("indeed"))  {
-            scrapers.add(new IndeedScraper(config));
-        }
-        if (config.getSites().getSites().contains("monster"))  {
-            scrapers.add(new MonsterScraper(config));
-        }
-        if (config.getSites().getSites().contains("github"))  {
-            scrapers.add(new GithubScraper(config));
-        }
-        if (config.getSites().getSites().contains("stackoverflow"))  {
-            scrapers.add(new StackoverflowScraper(config));
-        }
+        scrapers = Utils.getScrapers(config);
 
         writers = Arrays.asList(new DatabaseWriter(), new JsonWriter(), new ExcelWriter());
     }

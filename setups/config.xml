@@ -10,7 +10,11 @@
     <sites>
         <site>indeed</site>
 
+        <site>monster</site>
 
+        <site>github</site>
+
+        <site>stackoverflow</site>
     </sites>
 
     <frequency>
