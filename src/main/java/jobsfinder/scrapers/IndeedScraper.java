@@ -1,21 +1,40 @@
 package jobsfinder.scrapers;
 
 import jobsfinder.Job;
+import jobsfinder.Utils;
 import jobsfinder.config.Config;
+import org.jsoup.Connection;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
+
+import static java.util.concurrent.TimeUnit.SECONDS;
 
 public class IndeedScraper extends JobsScraper {
+    Connection.Response res;
+    Map<String, String> cookies;
+
+
     public IndeedScraper(Config config)  {
         super(config);
         setUrl("https://www.indeed.com/jobs?q=" + config.getSearchQuery() +
                 "&l=" + config.getLocation());
+
+        try {
+            res = Jsoup.connect(getUrl()).method(Connection.Method.GET).execute();
+            cookies = res.cookies();
+        }
+        catch (Exception e)  {
+            e.printStackTrace();
+        }
+    }
+
+    @Override
+    public String toString()  {
+        return "IndeedScraper";
     }
 
     public List<Job> scrape(Document doc)  {
@@ -74,11 +93,19 @@ public class IndeedScraper extends JobsScraper {
             int count = 0;
             boolean stop = false;
             do  {
-                Document doc = Jsoup.connect(url).get();
+                //System.out.println("Getting " + url);
+
+                //System.out.println("cookies: " + cookies);
+                Document doc = Jsoup.connect(url)
+                        .userAgent("Mozilla/5.0 (Windows NT 6.1; Win64; x64) " +
+                                "AppleWebKit/537.36 (KHTML, like Gecko) " +
+                                "Chrome/79.0.3945.130 Safari/537.36")
+                        .header("cookie",
+            Utils.getFirstLineFromFileFromPath("setups", "IndeedCookie.txt")).get();
                 Element paginationElement = doc.selectFirst(".pagination");
 
                 List<Job> subResult = scrape(doc);
-                System.out.println("count: " + count);
+                //System.out.println("count: " + count);
 
                 count += 10;
                 url = getUrl() + "&start=" + count;
@@ -86,7 +113,7 @@ public class IndeedScraper extends JobsScraper {
 
                 if (paginationElement == null ||
                         !paginationElement.text().toLowerCase().contains("next") ||
-                        subResult.size() == 0 || count >= 990) {
+                        subResult.size() == 0 || count > 990) {
                     stop = true;
                     System.out.println("No next button or something else, stopping");
                 }
@@ -101,9 +128,14 @@ public class IndeedScraper extends JobsScraper {
 
     @Override
     public void scrapeDetails(List<Job> jobs)  {
+        Random random = new Random();
+
         for (Job job: jobs)  {
             try {
-                Document jobDoc = Jsoup.connect(job.getUrl()).get();
+                System.out.println("sleeping...");
+                Thread.sleep(random.nextInt(300));
+
+                Document jobDoc = Jsoup.connect(job.getUrl()).userAgent("Chrome browser").get();
 
                 Element reviewsCount = jobDoc.selectFirst(".icl-Ratings-count");
                 job.setReviewsCount(reviewsCount != null ? reviewsCount.text() : "");

@@ -9,6 +9,7 @@ import org.jsoup.select.Elements;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 public class GithubScraper extends JobsScraper {
     public GithubScraper(Config config)  {
@@ -55,6 +56,11 @@ public class GithubScraper extends JobsScraper {
     }
 
     @Override
+    public String toString()  {
+        return "GithubScraper";
+    }
+
+    @Override
     public List<Job> scrape()  {
         List<Job> result = new ArrayList<>();
 
@@ -62,7 +68,7 @@ public class GithubScraper extends JobsScraper {
             String url = getUrl();
             boolean stop = false;
             do  {
-                Document doc = Jsoup.connect(url).get();
+                Document doc = Jsoup.connect(url).userAgent("Chrome browser").get();
                 Element paginationElement = doc.selectFirst(".pagination");
 
                 List<Job> subResult = scrape(doc);
@@ -92,9 +98,14 @@ public class GithubScraper extends JobsScraper {
 
     @Override
     public void scrapeDetails(List<Job> jobs)  {
+        Random random = new Random();
+
         for (Job job: jobs)  {
             try {
-                Document doc = Jsoup.connect(job.getUrl()).get();
+                System.out.println("sleeping...");
+                Thread.sleep(random.nextInt(1500));
+
+                Document doc = Jsoup.connect(job.getUrl()).userAgent("Chrome browser").get();
                 Element descriptionElement = doc.selectFirst(".column.main");
                 job.setDescription(descriptionElement != null ?
                         descriptionElement.text() : "");

@@ -19,6 +19,11 @@ public class StackoverflowScraper extends JobsScraper {
                 config.getSearchQuery() + "&l=" + config.getLocation() + "&d=20&u=Km");
     }
 
+    @Override
+    public String toString()  {
+        return "StackoverflowScraper";
+    }
+
     public List<Job> scrape(Document doc)  {
         List<Job> result = new ArrayList<>();
 
@@ -110,7 +115,7 @@ public class StackoverflowScraper extends JobsScraper {
                 System.out.println("sleeping...");
                 Thread.sleep(random.nextInt(5000));
 
-                Document doc = Jsoup.connect(job.getUrl())
+                Document doc = Jsoup.connect(job.getUrl()).userAgent("Chrome browser")
                         .timeout(10000).validateTLSCertificates(false).get();
 
                 Element dateElement = doc.selectFirst(".grid.mb24.fs-body1.fc-black-500");
@@ -161,7 +166,9 @@ public class StackoverflowScraper extends JobsScraper {
             boolean stop = false;
             do  {
                 Thread.sleep(random.nextInt(5000));
-                Document doc = Jsoup.connect(url).timeout(10000).validateTLSCertificates(false).get();
+                Document doc = Jsoup.connect(url).timeout(10000)
+                        .userAgent("Chrome browser").validateTLSCertificates(false).get();
+                System.out.println("Getting " + url);
                 Element paginationElement = doc.selectFirst(".s-pagination");
 
                 List<Job> subResult = scrape(doc);

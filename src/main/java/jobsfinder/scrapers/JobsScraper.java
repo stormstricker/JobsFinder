@@ -15,6 +15,8 @@ public abstract class JobsScraper {
 
     public abstract List<Job> scrape();
 
+    public abstract String toString();
+
     public void scrapeDetails(List<Job> jobs)  {}
 
     //getters

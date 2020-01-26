@@ -8,27 +8,18 @@
     </location>
 
     <sites>
-        <site>
-            https://indeed.com
-        </site>
+        <site>indeed</site>
 
-        <site>
-            https://monster.com
-        </site>
 
-        <site>
-            https://github.com
-        </site>
     </sites>
 
     <frequency>
         <hours>
             0
-
         </hours>
 
         <minutes>
-            1
+            0
         </minutes>
 
         <seconds>

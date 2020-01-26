@@ -51,6 +51,12 @@ public class ExcelKing {
     private IndexedColors defaultHeaderTextColor = IndexedColors.BLACK;
     private IndexedColors defaultHeaderBackgroundColor = IndexedColors.WHITE;
 
+    private boolean workbookNew = false;
+
+    public boolean isWorkbookNew()  {
+        return workbookNew;
+    }
+
     public void setupWorkbook()  {
         workbookFile = new File(workbookName);
 
@@ -79,6 +85,7 @@ public class ExcelKing {
 
         if (createNewFile)  {
             workbook = new XSSFWorkbook();
+            workbookNew = true;
         }
     }
 
@@ -96,11 +103,11 @@ public class ExcelKing {
                 if(sheet.getRow(i) != null) {
                     sheet.removeRow( sheet.getRow(i));
                 } else {
-                    System.out.println("Info: clean sheet='" + sheet.getSheetName() + "' ... skip line: " + i);
+                    //System.out.println("Info: clean sheet='" + sheet.getSheetName() + "' ... skip line: " + i);
                 }
             }
         } else {
-            System.out.println("Info: clean sheet='" + sheet.getSheetName() + "' ... is empty");
+            //System.out.println("Info: clean sheet='" + sheet.getSheetName() + "' ... is empty");
         }
     }
 
@@ -125,7 +132,13 @@ public class ExcelKing {
     }
 
     public int getLastRow(String sheetName)  {
-        return workbook.getSheet(sheetName).getLastRowNum();
+        int lastRowNum = workbook.getSheet(sheetName).getLastRowNum();
+
+        if (lastRowNum == 0)  {
+            return workbook.getSheet(sheetName).getPhysicalNumberOfRows() > 0 ? 0 : -1;
+        }
+
+        return lastRowNum;
     }
 
     public void append(List<ExcelRow> rows, String sheetName)  {
@@ -137,8 +150,8 @@ public class ExcelKing {
 
         try  {
             int lastRow = getLastRow(sheetName);
-            System.out.println("lastRow: " + lastRow);
-            starRow = lastRow==0 ? lastRow : lastRow + 1;
+            //System.out.println("lastRow: " + lastRow);
+            starRow = lastRow==-1 ? lastRow : lastRow + 1;
 
             write(rows,  sheetName, starRow);
         }
@@ -232,11 +245,13 @@ public class ExcelKing {
 
         System.out.println("finished editing");
         // Resize all columns to fit the content size
-        for(int z = 0; z <
-                Math.max(rows.get(0).getData().size(), rows.get(1).getData().size()); z++) {
-            sheet.autoSizeColumn(z);
+        /*int columnsCount = rows.size() == 1 ?
+                    rows.get(0).getData().size() :
+                    Math.max(rows.get(0).getData().size(), rows.get(1).getData().size());
+        for(int z = 0; z <columnsCount; z++) {
+            //sheet.autoSizeColumn(z);
             //sheet.setColumnWidth(z, Math.min(20000, sheet.getColumnWidth(z)));
-        }
+        }*/
 
         System.out.println("finished resizing");
         // Write the output to a file

@@ -1,47 +1,39 @@
-package gmail2excel;
+package jobsfinder;
 
-import javax.mail.Address;
-import java.io.BufferedReader;
-import java.io.FileReader;
+import java.io.*;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.TimeUnit;
-
-import static java.util.concurrent.TimeUnit.HOURS;
-import static java.util.concurrent.TimeUnit.MINUTES;
+import java.util.*;
 
 public class Utils {
-    public static List<String> splitInLines(String s)  {
-        List<String> result = new ArrayList<>();
-
-        int start=0;
-        int end = 0;
-        char[] chars = s.toCharArray();
-        while (end<s.length()-1)  {
-            if (chars[end]=='\n' || chars[end]=='\r')  {
-                result.add(s.substring(start, end));
-
-                start = end + 1;
-                while (start < s.length() && (start == '\n' || start=='\r'))  {
-                    start++;
-                    end = start + 1;
-                }
-            }
-
+    public static void removeDuplicates(Set<Job> allJobs,
+                                        List<List<Job>> jobsLists)  {
+        for (List<Job> jobs: jobsLists)  {
+            jobs.removeIf(item -> allJobs.contains(item));
         }
-
-        return result;
     }
 
-    public static List<String> getAllLinesFromFile(String filename)  {
+    public static void removeDuplicates(List<Job> allJobs,
+                                        List<List<Job>> jobsLists)  {
+        for (List<Job> jobs: jobsLists)  {
+            jobs.removeIf(item -> allJobs.contains(item));
+        }
+    }
+
+    public static String listToString(List<?> list, String separator)  {
+        String result = "";
+
+        for (Object e: list)  {
+            result += e.toString() + separator;
+        }
+
+        return result == "" ? result : result.substring(0, result.lastIndexOf(separator));
+    }
+
+    public static String getFirstLineFromFileFromPath(String packageName, String filename)  {
+
         try  {
-            BufferedReader br = new BufferedReader(new FileReader(Paths.get("setups", filename).toFile()));
-            List<String> result = new ArrayList<>();
-            String line;
-            while ((line = br.readLine())!=null)  {
-                result.add(line);
-            }
+            BufferedReader br = new BufferedReader(new FileReader(Paths.get(packageName, filename).toFile()));
+            String result = br.readLine();
             br.close();
 
             return result;
@@ -52,16 +44,54 @@ public class Utils {
         }
     }
 
-    public static String arrayToString(Address[] array)  {
-        String result = "";
-
-        for (Address a: array)  {
-            result += a.toString() + " ";
+    public static boolean addLineToFileFromPath(String packageName, String filename, String line) {
+        try {
+            Writer output;
+            System.out.println(Paths.get("").toString());
+            output = new BufferedWriter(new FileWriter(Paths.get(packageName, filename).toFile(), true));
+            output.append(line + System.lineSeparator());
+            output.close();
+            return true;
         }
-        if (result.length()>2)  {
-            result = result.substring(0, result.length() - 2);
+        catch (Exception e) {
+            e.printStackTrace();
+            return false;
         }
-
-        return result;
     }
+
+    public static boolean clearFileFromPath(String packageName, String filename)  {
+        try {
+            Writer output;
+            System.out.println(Paths.get("").toString());
+            output = new BufferedWriter(new FileWriter(Paths.get(packageName, filename).toFile()));
+
+            output.close();
+            return true;
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    public static List<String> getAllLinesFromFileFromPath(String packageName, String filename)  {
+        try  {
+            BufferedReader br = new BufferedReader(new FileReader(Paths.get(packageName, filename).toFile()));
+            List<String> result = new ArrayList<>();
+            String line;
+            while ((line = br.readLine())!=null)  {
+                result.add(line);
+            }
+            br.close();
+
+            System.out.println("result size: " + result.size());
+            return result;
+        }
+        catch (Exception e)  {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+
 }

@@ -1,31 +1,85 @@
 package jobsfinder;
 
+import jobsfinder.scrapers.MonsterJobJson;
+
+import javax.persistence.*;
+import java.time.Instant;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
+@Entity
+@Table(name = "jobs")
 public class Job {
-    private String title;
-    private String company;
-    private String summary;
-    private String description;
-    private String location;
-    private String date;
-    private String url;
-    private String rating;
-    private String reviewsCount;
-    private String salary;
+    @Id
+    @GeneratedValue
+    private int id;
 
-    private String schedule;
+    @Column(name = "title", columnDefinition="TEXT")
+    private String title = "";
+    @Column(name = "company", columnDefinition="TEXT")
+    private String company = "";
 
+    @Column(name = "summary", columnDefinition="TEXT")
+    private String summary = "";
+    @Column(name = "description", columnDefinition="TEXT")
+    private String description = "";
+    @Column(name = "location", columnDefinition="TEXT")
+    private String location = "";
+    private String date = "";
+
+    @Column(name = "url", columnDefinition="TEXT")
+    private String url = "";
+    private String rating = "";
+    private String reviewsCount = "";
+    private String salary = "";
+
+    private String schedule = "";
+
+    @Transient
     private List<String> tags = new ArrayList<>();
+    @Transient
     private List<String> notes = new ArrayList<>();
 
-    private String experience;
+    @Column(name = "tagsValue", columnDefinition="TEXT")
+    private String tagsValue = "";
+    @Column(name = "notesValue", columnDefinition="TEXT")
+    private String notesValue = "";
 
+    private String experience = "";
+
+    @Basic
+    private Instant added = Instant.now();
 
     public Job()  {}
 
+    public Job(MonsterJobJson monsterJobJson)  {
+        setTitle(monsterJobJson.getTitle());
+        setCompany(monsterJobJson.getCompany().getName());
+        setLocation(monsterJobJson.getLocationText());
+        setDate(monsterJobJson.getDatePostedText());
+        setUrl(monsterJobJson.getJobViewUrl());
+    }
+    @Override
+    public int hashCode() {
+        return url.hashCode();
+    }
 
+    @Override
+    public boolean equals(Object o)  {
+        if (!(o instanceof Job))  {
+            return false;
+        }
+
+        Job oj = (Job) o;
+        boolean sameUrls = url.equalsIgnoreCase(oj.getUrl());
+        boolean sameTitleCompanyDescriptionLocation =
+                (title.equalsIgnoreCase(oj.getTitle()) &&
+                    company.equalsIgnoreCase(oj.getCompany()) &&
+                    description.equalsIgnoreCase(oj.getDescription()) &&
+                    location.equalsIgnoreCase(oj.getLocation()));
+        return sameUrls || sameTitleCompanyDescriptionLocation;
+    }
 
     //getters
     public String getTitle() {
@@ -73,16 +127,43 @@ public class Job {
     }
 
     public List<String> getTags()  {
+        if (tags.size() == 0 &&
+                !tagsValue.equalsIgnoreCase(""))  {
+            tags = new ArrayList<>(
+                    Arrays.asList(tagsValue.split("\n")));
+        }
+
         return tags;
     }
 
     public List<String> getNotes()  {
+        if (notes.size() == 0 &&
+                !notesValue.equalsIgnoreCase(""))  {
+            notes = new ArrayList<>(
+                    Arrays.asList(notesValue.split("\n")));
+        }
+
+
         return notes;
     }
 
     public String getExperience()  {
         return experience;
     }
+
+    public int getId()  {
+        return id;
+    }
+
+    public String getTagsValue() {
+        return tagsValue;
+    }
+
+    public String getNotesValue() {
+        return notesValue;
+    }
+
+    public Instant getAdded()  {return added;}
 
     //private setters
     public void setTitle(String title) {
@@ -106,7 +187,14 @@ public class Job {
     }
 
     public void setUrl(String url) {
-        this.url = url;
+        if (url.startsWith("https://stackoverflow.com/jobs/"))  {
+            url = url.replace("https://stackoverflow.com/jobs/", "");
+            this.url = "https://stackoverflow.com/jobs/" + url.substring(0, url.indexOf("/"));
+            System.out.println();
+        }
+        else {
+            this.url = url;
+        }
     }
 
     public void setSummary(String summary)  {
@@ -131,102 +219,50 @@ public class Job {
 
     public void setTags(List<String> tags)  {
         this.tags = tags;
+        tagsValue = Utils.listToString(tags, "\n");
     }
 
     public void addTag(String tag)  {
         this.tags.add(tag);
+        tagsValue = Utils.listToString(tags, "\n");
     }
 
     public void setNotes(List<String> notes)  {
         this.notes = notes;
+        notesValue = notes.toString();
+        notesValue = Utils.listToString(notes, "\n");
     }
 
     public void addNote(String note) {
         this.notes.add(note);
+        notesValue = notes.toString();
+        notesValue = Utils.listToString(notes, "\n");
     }
 
     public void setExperience(String experience)  {
         this.experience = experience;
     }
 
-    public static Builder builder()  {
-        return new Job().new Builder();
+    public void setId(int id)  {
+        this.id = id;
     }
 
-    public class Builder {
-        private Builder()  {}
+    public void setTagsValue(String tagsValue) {
+        this.tagsValue = tagsValue;
 
-        public Job build()  {return Job.this;}
+        tags = new ArrayList<>(
+                Arrays.asList(tagsValue.split("\n")));
+    }
 
-        //setters
-        public Builder setTitle(String title) {
-            Job.this.title = title;
-            return this;
-        }
+    public void setNotesValue(String notesValue) {
+        this.notesValue = notesValue;
 
-        public Builder setCompany(String company) {
-            Job.this.company = company;
-            return this;
-        }
+        notes = new ArrayList<>(
+                Arrays.asList(notesValue.split("\n")));
+    }
 
-        public Builder setDescription(String description) {
-            Job.this.description = description;
-            return this;
-        }
-
-        public Builder setLocation(String location) {
-            Job.this.location = location;
-            return this;
-        }
-
-        public Builder setDate(String date) {
-            Job.this.date = date;
-            return this;
-        }
-
-        public Builder setUrl(String url) {
-            Job.this.url = url;
-            return this;
-        }
-
-        public Builder setSummary(String summary)  {
-            Job.this.summary = summary;
-            return this;
-        }
-
-        public Builder setRating(String rating)  {
-            Job.this.rating = rating;
-            return this;
-        }
-
-        public Builder setReviewsCount(String reviewsCount)  {
-            Job.this.reviewsCount = reviewsCount;
-            return this;
-        }
-
-        public Builder setSalary(String salary)  {
-            Job.this.salary = salary;
-            return this;
-        }
-
-        public Builder setSchedule(String schedule)  {
-            Job.this.schedule = schedule;
-            return this;
-        }
-
-        public Builder setTags(List<String> tags)  {
-            Job.this.tags = tags;
-            return this;
-        }
-
-        public Builder setNotes(List<String> notes)  {
-            Job.this.notes = notes;
-            return this;
-        }
-
-        public Builder setExperience(String experience)  {
-            Job.this.experience = experience;
-            return this;
-        }
+    public void setAdded(Instant added)  {
+        this.added =added;
     }
 }
+
