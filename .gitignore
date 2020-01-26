@@ -2,7 +2,6 @@
 target
 *.iml
 *.rar
-*.jar
 *.iml
 *.ipr
 *.iws

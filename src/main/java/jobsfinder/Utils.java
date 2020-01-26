@@ -3,7 +3,6 @@ package jobsfinder;
 import jobsfinder.config.Config;
 import jobsfinder.scrapers.*;
 
-import javax.print.attribute.standard.JobSheets;
 import java.io.*;
 import java.nio.file.Paths;
 import java.util.*;

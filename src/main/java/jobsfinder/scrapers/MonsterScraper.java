@@ -106,6 +106,7 @@ public class MonsterScraper extends JobsScraper {
                 job.setDescription(detailsElement != null ? detailsElement.text() : "");
             }
             catch (Exception e)  {
+                job.setDescription("unavailable");
                 e.printStackTrace();
             }
         }
